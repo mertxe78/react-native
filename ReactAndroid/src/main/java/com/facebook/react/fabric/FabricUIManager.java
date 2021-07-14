@@ -820,6 +820,11 @@ public class FabricUIManager implements UIManager, LifecycleEventListener {
       FLog.d(TAG, "Emitted event without surfaceId: [%d] %s", reactTag, eventName);
     }
 
+    if (mDestroyed) {
+      FLog.e(TAG, "Attempted to receiveEvent after destruction");
+      return;
+    }
+
     EventEmitterWrapper eventEmitter = mMountingManager.getEventEmitter(surfaceId, reactTag);
 
     if (eventEmitter == null) {
@@ -829,9 +834,9 @@ public class FabricUIManager implements UIManager, LifecycleEventListener {
     }
 
     if (canCoalesceEvent) {
-      eventEmitter.invoke(eventName, params);
-    } else {
       eventEmitter.invokeUnique(eventName, params, customCoalesceKey);
+    } else {
+      eventEmitter.invoke(eventName, params);
     }
   }
 
